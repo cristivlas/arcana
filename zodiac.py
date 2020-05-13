@@ -79,9 +79,9 @@ class Zodiac:
         xy = [int(self.radius - iconSize/2 * Zodiac.scale + 0.575 * self.radius * i) for i in cossin]
         image.paste(icon, xy, icon)
 
-        self._draw_decans(image, canvas, angle, sign, index)
+        self._draw_decans(image, canvas, angle, sign)
 
-    def _draw_decans(self, image, canvas, angle, sign, index):
+    def _draw_decans(self, image, canvas, angle, sign):
         for j in range(0, 3):
             a = angle + j * Zodiac.step/3
             cossin = [math.cos(a), math.sin(a)]
@@ -98,7 +98,10 @@ class Zodiac:
             # compute radius for circle around planet name
             # yes, I know the Sun is not a planet.
             r = Zodiac.step * self.radius *.45 if planet=='Sun' else max(textSize)/2
-            canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[1]-r, xy[0]+r, xy[1]+r]], fill=None, outline=self.args.fg, width=1)
+            canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[1]-r, xy[0]+r, xy[1]+r]], fill=None, outline=self.args.fg, width=Zodiac.scale)
+
+            # just a cool effect:
+            canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[0]-r, xy[1]+r, xy[1]+r]], fill=None, outline=self.args.fg)
 
             # OK. Now let's draw the names of the constellations associated with each of the decans
             constellation = sign['decans'][j]['constellation']
