@@ -1,0 +1,483 @@
+[
+    {
+        "name": "Aries",
+        "symbol": "The Ram",
+        "dates": ["March 21st", "April 19th"],
+        "ruler": "Mars",
+        "duality": "M", 
+        "element": "Fire",
+        "trait": "Cardinal",
+        "decans": [
+            {
+                "keyword": "Inspiration",
+                "dates": ["March 21st", "March 31st"],
+                "constellation": 
+                {
+                    "name": "Andromeda",
+                    "symbol": "The power of love."
+                },
+                "subruler": "Mars"
+            },
+            {
+                "keyword": "Innovation",
+                "dates": ["April 1st", "April 10th"],
+                "constellation": 
+                {
+                    "name": "Cetus",
+                    "symbol": "Energy harnessed by imagination and love."
+                },
+                "subruler": "Sun"
+            },
+            {
+                "keyword": "Foresight",
+                "dates": ["April 11th", "April 19th"],
+                "constellation": 
+                {
+                    "name": "Cassiopeia",
+                    "symbol": "Good judgment."
+                },
+                "subruler": "Jupiter"
+            }
+        ]
+    },
+    {
+        "name": "Taurus",
+        "symbol": "The Bull",
+        "dates": ["April 20th", "May 20th"],
+        "ruler": "Venus",
+        "duality": "F", 
+        "element": "Earth",
+        "trait": "Fixed",
+        "decans": [
+            {
+                "keyword": "Acquisition",
+                "dates": ["April 20th", "April 30th"],
+                "constellation": 
+                {
+                    "name": "Triangulum",
+                    "symbol": "Mystic symbol of truth and harmony."
+                },
+                "subruler": "Venus"
+            },
+            {
+                "keyword": "Evaluation",
+                "dates": ["May 1st", "May 10th"],
+                "constellation": {
+                    "name": "Eridanus",
+                    "symbol": "Justice."
+                },
+                "subruler": "Mercury"
+            },
+            {
+                "keyword": "Determination",
+                "dates": ["May 11th", "May 20th"],
+                "constellation": 
+                {
+                    "name": "Perseus",
+                    "symbol": "The rescuer. Victory."
+                },
+                "subruler": "Saturn"
+            }
+        ]
+    },
+    {
+        "name": "Gemini",
+        "symbol": "The Twins",
+        "dates": ["May  21st", "June 20th"],
+        "ruler": "Mercury",
+        "duality": "M", 
+        "element": "Air",
+        "trait": "Mutable",
+        "decans": [
+            {
+                "keyword": "Ingenuity",
+                "dates": ["May 21st", "May 31st"],
+                "constellation": 
+                {
+                    "name": "Lepus",
+                    "symbol": "Triumph over enemies by outwitting them."
+                },
+                "subruler": "Mercury"
+            },
+            {
+                "keyword": "Union",
+                "dates": ["June 1st", "June 10th"],
+                "constellation": {
+                    "name": "Orion",
+                    "symbol": "Giant hunter. Strength and beauty."
+                },
+                "subruler": "Venus"
+            },
+            {
+                "keyword": "Reason",
+                "dates": ["June 11th", "June 20th"],
+                "constellation": 
+                {
+                    "name": "Auriga",
+                    "symbol": "The four-wheeled chariot symbolises communications."
+                },
+                "subruler": "Uranus"
+            }
+        ]
+    },
+    {
+        "name": "Cancer",
+        "symbol": "The Crab",
+        "dates": ["June  21st", "July 22nd"],
+        "ruler": "Moon",
+        "duality": "F", 
+        "element": "Water",
+        "trait": "Cardinal",
+        "decans": [
+            {
+                "keyword": "Receptiveness",
+                "dates": ["June 21st", "June 30th"],
+                "constellation": 
+                {
+                    "name": "Canis Minor",
+                    "symbol": "Reason."
+                },
+                "subruler": "Moon"
+            },
+            {
+                "keyword": "Intensity",
+                "dates": ["July 1st", "July 11th"],
+                "constellation": {
+                    "name": "Canis Major",
+                    "symbol": "Companion to the might hunter Orion, symbolizes triumph."
+                },
+                "subruler": "Pluto"
+            },
+            {
+                "keyword": "Empathy",
+                "dates": ["July 12th", "July 22nd"],
+                "constellation": 
+                {
+                    "name": "Argo Navis",
+                    "symbol": "The magical ship of adventure symbolizes strength of mind."
+                },
+                "subruler": "Neptune"
+            }
+        ]
+    },
+    {
+        "name": "Leo",
+        "symbol": "The Lion",
+        "dates": ["July  23rd", "August 22nd"],
+        "ruler": "Sun",
+        "duality": "M", 
+        "element": "Fire",
+        "trait": "Fixed",
+        "decans": [
+            {
+                "keyword": "Self-expression",
+                "dates": ["July 23rd", "August 1st"],
+                "constellation": 
+                {
+                    "name": "Ursa Minor",
+                    "symbol": "Goals, true direction."
+                },
+                "subruler": "Sun"
+            },
+            {
+                "keyword": "Expansion",
+                "dates": ["August 2nd", "August 12th"],
+                "constellation": {
+                    "name": "Ursa Major",
+                    "symbol": "Wisdom."
+                },
+                "subruler": "Jupiter"
+            },
+            {
+                "keyword": "Creativity",
+                "dates": ["August 13th", "August 22nd"],
+                "constellation": 
+                {
+                    "name": "Hydra",
+                    "symbol": "Activism. Mental Energy."
+                },
+                "subruler": "Mars"
+            }
+        ]
+    },
+    {
+        "name": "Virgo",
+        "symbol": "The Virgin",
+        "dates": ["August  23rd", "September 22nd"],
+        "ruler": "Mercury",
+        "duality": "F", 
+        "element": "Earth",
+        "trait": "Mutable",
+        "decans": [
+            {
+                "keyword": "Analysis",
+                "dates": ["August 23rd", "September 1st"],
+                "constellation": 
+                {
+                    "name": "Crater",
+                    "symbol": "The cup is a symbol of giving."
+                },
+                "subruler": "Mercury"
+            },
+            {
+                "keyword": "Efficiency",
+                "dates": ["September 2nd", "September 12th"],
+                "constellation": {
+                    "name": "Hercules",
+                    "symbol": "The hero that triumphs over evil."
+                },
+                "subruler": "Saturn"
+            },
+            {
+                "keyword": "Discrimination",
+                "dates": ["September 13th", "September 22nd"],
+                "constellation": 
+                {
+                    "name": "Bootes",
+                    "symbol": "The Bear Driver, ancient herdsman: the utilization of knowledge."
+                },
+                "subruler": "Venus"
+            }
+        ]
+    },
+    {
+        "name": "Libra",
+        "symbol": "The Scales",
+        "dates": ["September 23rd", "October 22nd"],
+        "ruler": "Venus",
+        "duality": "M", 
+        "element": "Air",
+        "trait": "Cardinal",
+        "decans": [
+            {
+                "keyword": "Magnetism",
+                "dates": ["September 23rd", "October 2nd"],
+                "constellation": 
+                {
+                    "name": "Corvus",
+                    "symbol": "Idealism, sense of duty."
+                },
+                "subruler": "Venus"
+            },
+            {
+                "keyword": "Endurance",
+                "dates": ["October 3rd", "October 13th"],
+                "constellation": {
+                    "name": "Centaurus",
+                    "symbol": "Duality in human beings."
+                },
+                "subruler": "Uranus"
+            },
+            {
+                "keyword": "Order",
+                "dates": ["October 14th", "October 22nd"],
+                "constellation": 
+                {
+                    "name": "Corona Borealis",
+                    "symbol": "Achievement."
+                },
+                "subruler": "Mercury"
+            }
+        ]
+    },
+    {
+        "name": "Scorpio",
+        "symbol": "The Scorpion",
+        "dates": ["October 23rd", "November 21st"],
+        "ruler": "Pluto",
+        "duality": "F", 
+        "element": "Water",
+        "trait": "Fixed",
+        "decans": [
+            {
+                "keyword": "Integrity",
+                "dates": ["October 23rd", "November 1st"],
+                "constellation": 
+                {
+                    "name": "Serpens",
+                    "symbol": "Power, occult knowledge."
+                },
+                "subruler": "Pluto"
+            },
+            {
+                "keyword": "Regeneration",
+                "dates": ["November 2nd", "November 11th"],
+                "constellation": {
+                    "name": "Lupus",
+                    "symbol": "The wolf symbolizes offering."
+                },
+                "subruler": "Neptune"
+            },
+            {
+                "keyword": "Clarification",
+                "dates": ["November 12th", "November 21st"],
+                "constellation": 
+                {
+                    "name": "Aquila",
+                    "symbol": "Rising above human limitations."
+                },
+                "subruler": "Moon"
+            }
+        ]
+    },
+    {
+        "name": "Sagittarius",
+        "symbol": "The Archer",
+        "dates": ["November 22nd", "December 21st"],
+        "ruler": "Jupiter",
+        "duality": "M", 
+        "element": "Fire",
+        "trait": "Mutable",
+        "decans": [
+            {
+                "keyword": "Honesty",
+                "dates": ["November 22nd", "December 1st"],
+                "constellation": 
+                {
+                    "name": "Ophiucus",
+                    "symbol": "Victory over adversity."
+                },
+                "subruler": "Jupiter"
+            },
+            {
+                "keyword": "Drive",
+                "dates": ["December 2nd", "December 11th"],
+                "constellation": {
+                    "name": "Sagitta",
+                    "symbol": "The arrow symbolizes destruction of evil."
+                },
+                "subruler": "Mars"
+            },
+            {
+                "keyword": "Intuition",
+                "dates": ["December 12th", "December 21st"],
+                "constellation": 
+                {
+                    "name": "Ara",
+                    "symbol": "The altar of Dionysus. Unity and triumph."
+                },
+                "subruler": "Sun"
+            }
+        ]
+    },
+    {
+        "name": "Capricorn",
+        "symbol": "The Goat",
+        "dates": ["December 22nd", "January 19th"],
+        "ruler": "Saturn",
+        "duality": "F", 
+        "element": "Earth",
+        "trait": "Cardinal",
+        "decans": [
+            {
+                "keyword": "Responsibility",
+                "dates": ["December 22nd", "December 31st"],
+                "constellation": 
+                {
+                    "name": "Corona Australis",
+                    "symbol": "Commitment to knowledge."
+                },
+                "subruler": "Saturn"
+            },
+            {
+                "keyword": "Fairness",
+                "dates": ["January 1st", "January 10th"],
+                "constellation": {
+                    "name": "Lira",
+                    "symbol": "Music, harmony."
+                },
+                "subruler": "Venus"
+            },
+            {
+                "keyword": "Honor",
+                "dates": ["January 11th", "January 19th"],
+                "constellation": 
+                {
+                    "name": "Draco",
+                    "symbol": "The dragon. Observation and intuition."
+                },
+                "subruler": "Mercury"
+            }
+        ]
+    },
+    {
+        "name": "Aquarius",
+        "symbol": "The Water Bearer",
+        "dates": ["January 22nd", "February 18th"],
+        "ruler": "Uranus",
+        "duality": "M",
+        "element": "Air",
+        "trait": "Fixed",
+        "decans": [
+            {
+                "keyword": "Knowledge",
+                "dates": ["January 22nd", "January 29th"],
+                "constellation": 
+                {
+                    "name": "Delphinus",
+                    "symbol": "Spirituality."
+                },
+                "subruler": "Uranus"
+            },
+            {
+                "keyword": "Frankness",
+                "dates": ["January 30th", "February 8th"],
+                "constellation": {
+                    "name": "Piscis Austrinus",
+                    "symbol": "Fountain of widsdom."
+                },
+                "subruler": "Mercury"
+            },
+            {
+                "keyword": "Association",
+                "dates": ["February 9th", "February 18th"],
+                "constellation": 
+                {
+                    "name": "Equuleus",
+                    "symbol": "Loyalty."
+                },
+                "subruler": "Venus"
+            }
+        ]
+    },
+    {
+        "name": "Pisces",
+        "symbol": "The Fishes",
+        "dates": ["February 19th", "March 20th"],
+        "ruler": "Neptune",
+        "duality": "F",
+        "element": "Water",
+        "trait": "Mutable",
+        "decans": [
+            {
+                "keyword": "Immagination",
+                "dates": ["February 19th", "February 29th"],
+                "constellation": 
+                {
+                    "name": "Pegasus",
+                    "symbol": "The winged horse bears the rider of good fortune."
+                },
+                "subruler": "Neptune"
+            },
+            {
+                "keyword": "Compassion",
+                "dates": ["March 1st", "March 10th"],
+                "constellation": {
+                    "name": "Cygnus",
+                    "symbol": "Grace and beauty."
+                },
+                "subruler": "Moon"
+            },
+            {
+                "keyword": "Action",
+                "dates": ["March 11th", "March 20th"],
+                "constellation": 
+                {
+                    "name": "Cepheus",
+                    "symbol": "Constancy."
+                },
+                "subruler": "Pluto"
+            }
+        ]
+    }
+]
