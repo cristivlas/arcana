@@ -5,8 +5,6 @@ import json
 import math
 import argparse
 
-# Where fonts, images, and other resources for this program are
-
 class Zodiac:
     # anti-aliasing trick: draw everything as a larger image
     # then scale it back down. Try setting scale = 1 to see the difference
