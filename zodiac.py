@@ -50,7 +50,6 @@ class Zodiac:
     # draw one sector of the circle that corresponds to an astrological sign
     def _draw_sign(self, symbols, image, canvas, angle, sign, index):
         name = sign['name']
-        #_draw_symbol(im, draw, index, scale, radius, rad, radstep, symbols)
 
         # use the font to compute the [width, height] of the text to draw
         textSize = self.font1.getsize(name)
@@ -132,7 +131,7 @@ class Zodiac:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Draw the Zodiac')
     parser.add_argument('--bg', help='background color', default='wheat')
-    parser.add_argument('--res', help='specifiy the resources folder', default='res')
+    parser.add_argument('--res', help='specify the resources folder', default='res')
     parser.add_argument('--file', help='file containing the json data that describes the Zodiac', default='zodiac.json')
     parser.add_argument('--fg', help='foreground color', default='black')
     parser.add_argument('--main-font', help='font for astrological symbol names', default='deutschgothic.ttf')
