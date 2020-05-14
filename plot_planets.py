@@ -5,7 +5,7 @@ import datetime
 import math
 import os.path
 
-from astropy.constants import astropyconst40 as const
+from astropy.constants import astropyconst20 as const
 from astropy import units as u
 from dateutil import parser as dtparser
 from PIL import Image, ImageDraw, ImageFont
@@ -76,7 +76,7 @@ def plot_solar_system_bodies(names, time, location, radius, fg='black', bg='whit
         draw.line([i + r for i in [0,0,x,y]], fill=fg)
 
         # draw the cellestial body
-        rbody = (solar_system[name]) * r / 4;
+        rbody = (solar_system[name]) * r / 4
 
         # 2 extra pixel margin
         rbody += 2 * antialias_scale
@@ -89,7 +89,7 @@ def plot_solar_system_bodies(names, time, location, radius, fg='black', bg='whit
                 draw.ellipse(bbox, outline=fg, width=antialias_scale, fill=bg)
         else:
             draw.ellipse(bbox, outline=fg, width=2 * antialias_scale, fill=bg)
-        crop = Image.blend(image.crop(bbox), crop, 0.45)
+        crop = Image.blend(image.crop(bbox), crop, 0.35)
         image.paste(crop, bbox)
         text_size = font.getsize(name)
         draw.text([i + r for i in [x-text_size[0]/2, y-text_size[1]/2]], name.capitalize(), font=font, fill=fg)        
@@ -108,13 +108,9 @@ if __name__ == '__main__':
 
     # https://mistifonts.com/self-deception/
     font = ImageFont.truetype(os.path.join('res', 'SelfDeceptionRegular-ALLWA.ttf'), 30 * antialias_scale)    
-    #font = ImageFont.truetype(os.path.join('res', 'Praetoria D.otf'), 20 * antialias_scale)
-    
-    #cs.solar_system_ephemeris.set('de432s')
     cs.solar_system_ephemeris.set('jpl')
 
     location = cs.EarthLocation.of_address(args.location)
-    #print (location)
 
     if 'all' in args.input:
         args.input = list(solar_system_radii.keys())
