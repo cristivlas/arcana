@@ -35,7 +35,7 @@ class Zodiac:
         canvas = ImageDraw.Draw(image)
 
         # draw each sign with its decans
-        angle = 0 
+        angle = -math.pi
         for i, sign in enumerate(self.data):
             angle -= Zodiac.step
             self._draw_sign(symbols, image, canvas, angle, sign, i)
@@ -108,7 +108,7 @@ class Zodiac:
 
             a -= Zodiac.step / 24
             # Image rotation function want their arguments in degrees
-            degrees = -math.degrees(a)
+            degrees = -math.degrees(a) % 360
             textSize = self.font2.getsize(name)
 
             # create a temporary image on which to draw the text
