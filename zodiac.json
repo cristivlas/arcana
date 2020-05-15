@@ -2,6 +2,7 @@
     {
         "name": "Aries",
         "symbol": "The Ram",
+        "stars": ["Hamal"],
         "dates": ["March 21st", "April 19th"],
         "ruler": "Mars",
         "duality": "M", 
@@ -42,6 +43,7 @@
     },
     {
         "name": "Taurus",
+        "stars": ["Aldebaran"],
         "symbol": "The Bull",
         "dates": ["April 20th", "May 20th"],
         "ruler": "Venus",
@@ -82,6 +84,7 @@
     },
     {
         "name": "Gemini",
+        "stars": ["Pollux", "Castor"],
         "symbol": "The Twins",
         "dates": ["May  21st", "June 20th"],
         "ruler": "Mercury",
@@ -122,6 +125,7 @@
     },
     {
         "name": "Cancer",
+        "stars": ["Altarf"],
         "symbol": "The Crab",
         "dates": ["June  21st", "July 22nd"],
         "ruler": "Moon",
@@ -162,6 +166,7 @@
     },
     {
         "name": "Leo",
+        "stars": ["Regulus"],
         "symbol": "The Lion",
         "dates": ["July  23rd", "August 22nd"],
         "ruler": "Sun",
@@ -202,6 +207,7 @@
     },
     {
         "name": "Virgo",
+        "stars": ["Spica"],
         "symbol": "The Virgin",
         "dates": ["August  23rd", "September 22nd"],
         "ruler": "Mercury",
@@ -242,6 +248,7 @@
     },
     {
         "name": "Libra",
+        "stars": ["Zubeneschamali"],
         "symbol": "The Scales",
         "dates": ["September 23rd", "October 22nd"],
         "ruler": "Venus",
@@ -281,7 +288,8 @@
         ]
     },
     {
-        "name": "Scorpio",
+        "name": "Scorpius",
+        "stars": ["Antares"],
         "symbol": "The Scorpion",
         "dates": ["October 23rd", "November 21st"],
         "ruler": "Pluto",
@@ -322,6 +330,7 @@
     },
     {
         "name": "Sagittarius",
+        "stars": ["Kaus Australis"],
         "symbol": "The Archer",
         "dates": ["November 22nd", "December 21st"],
         "ruler": "Jupiter",
@@ -361,7 +370,8 @@
         ]
     },
     {
-        "name": "Capricorn",
+        "name": "Capricornus",
+        "stars": ["Deneb Algedi"],
         "symbol": "The Goat",
         "dates": ["December 22nd", "January 19th"],
         "ruler": "Saturn",
@@ -402,6 +412,7 @@
     },
     {
         "name": "Aquarius",
+        "stars": ["Sadalsuud"],
         "symbol": "The Water Bearer",
         "dates": ["January 22nd", "February 18th"],
         "ruler": "Uranus",
@@ -442,6 +453,7 @@
     },
     {
         "name": "Pisces",
+        "stars": ["Alpherg"],
         "symbol": "The Fishes",
         "dates": ["February 19th", "March 20th"],
         "ruler": "Neptune",

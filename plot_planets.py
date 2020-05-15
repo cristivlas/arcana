@@ -120,7 +120,8 @@ if __name__ == '__main__':
     else:
         time = datetime.datetime.utcnow()
     time = astropy.time.Time(time)
-    print (time)
+    print ('Observation time:', time)
+    print ('Location:', (location.lat, location.lon))
 
     image = plot_solar_system_bodies(args.input, time, location, args.radius, bg=args.bg, fg=args.fg)
     image.show()

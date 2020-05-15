@@ -1,6 +1,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from os import path
+from signs import Icons
 import json
 import math
 import argparse
@@ -19,7 +20,7 @@ class Zodiac:
         self.data = data
         self.font1 = ImageFont.truetype(path.join(args.res, args.main_font), int(Zodiac.scale * args.radius / 15))
         self.font2 = ImageFont.truetype(path.join(args.res, args.secondary_font), int(Zodiac.scale * args.radius / 25))
-        self.symbols = Image.open(path.join(args.res, 'Astro_signs.png'))
+        self.icons = Icons(path.join(args.res, 'Astro_signs.png'), Zodiac.scale)
         
     def draw(self):
         # size of final image [width, height]
@@ -28,9 +29,6 @@ class Zodiac:
         # radius for drawing at blown-up scale
         self.radius = Zodiac.scale * args.radius
 
-        # image that holds the icons, 4 x 3
-        symbols = self.symbols.resize([n * Zodiac.scale for n in [400, 300]], Image.LANCZOS).convert('RGBA')
-
         image = Image.new('RGBA', [2*self.radius] * 2, args.bg)
         canvas = ImageDraw.Draw(image)
 
@@ -38,7 +36,7 @@ class Zodiac:
         angle = -math.pi
         for i, sign in enumerate(self.data):
             angle -= Zodiac.step
-            self._draw_sign(symbols, image, canvas, angle, sign, i)
+            self._draw_sign(image, canvas, angle, sign, i)
 
         # draw some circles...
         for offs in [0, .2 * self.radius, .21 * self.radius]:
@@ -48,7 +46,7 @@ class Zodiac:
         return image.resize(size, Image.LANCZOS)
     
     # draw one sector of the circle that corresponds to an astrological sign
-    def _draw_sign(self, symbols, image, canvas, angle, sign, index):
+    def _draw_sign(self, image, canvas, angle, sign, index):
         name = sign['name']
 
         # use the font to compute the [width, height] of the text to draw
@@ -65,16 +63,9 @@ class Zodiac:
         xy = [0, 0] + [self.radius * i for i in [math.cos(angle), math.sin(angle)]]
         canvas.line([i + self.radius for i in xy], fill=self.args.fg, width=3 * Zodiac.scale)
 
-        # some arbitrary scaling:
-        iconSize = self.radius / 30
-        
-        # calculate the row and column where the icon is in the symbols image
-        row = int(index / 4)
-        col = int(index % 4)
-        # ... and crop it out
-        cropbox =[coord * 100 * Zodiac.scale for coord in [col, row, col+1, row+1]]        
-        icon = symbols.crop(cropbox).resize(2 * [int(iconSize * Zodiac.scale)])
-
+        # draw the icon (symbol) for the astrological sign
+        iconSize = self.radius / 30 # some arbitrary scaling that looks good        
+        icon = self.icons.get(index, iconSize)
         xy = [int(self.radius - iconSize/2 * Zodiac.scale + 0.575 * self.radius * i) for i in cossin]
         image.paste(icon, xy, icon)
 
@@ -129,13 +120,13 @@ class Zodiac:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Draw the Zodiac')
+    parser = argparse.ArgumentParser(description='Draw the Zodiac Wheel')
     parser.add_argument('--bg', help='background color', default='wheat')
     parser.add_argument('--res', help='specify the resources folder', default='res')
     parser.add_argument('--file', help='file containing the json data that describes the Zodiac', default='zodiac.json')
     parser.add_argument('--fg', help='foreground color', default='black')
     parser.add_argument('--main-font', help='font for astrological symbol names', default='deutschgothic.ttf')
-    parser.add_argument('--out', help='output file, if None image will not be saved')    
+    parser.add_argument('--out', help='output file; if none is specified then the image will not be saved')    
     parser.add_argument('--radius', help='radius for the drawing', default=400, type=int)
     parser.add_argument('--secondary-font', help='font for celestial body names', default='Praetoria D.otf')
 
