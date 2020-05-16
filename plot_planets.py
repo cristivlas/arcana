@@ -72,7 +72,7 @@ def plot_solar_system_bodies(names, time, location, radius, fg='black', bg='whit
         draw.ellipse([r - proj, r - proj, r + proj, r + proj], outline=fg)
 
         a = altAz.az.rad - math.pi / 2
-        x,y = (proj * i for i in [math.cos(a), math.sin(a)])
+        x,y = (proj * i for i in [math.cos(a), -math.sin(a)])
         draw.line([i + r for i in [0,0,x,y]], fill=fg)
 
         # draw the cellestial body

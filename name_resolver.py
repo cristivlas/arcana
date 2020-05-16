@@ -49,7 +49,7 @@ class NameResolver:
         self._save_data()
 
     def _load_data(self):
-        print ('reading', self.path)
+        #print ('reading', self.path)
         with open(self.path) as f:
             try:
                 self.data = json.load(f)
@@ -58,7 +58,7 @@ class NameResolver:
                 print ('unlinked cache file', self.path)
 
     def _save_data(self):
-        print ('writing', self.path)
+        #print ('writing', self.path)
         with open(self.path, 'w') as f:
             json.dump(obj=self.data, fp=f, sort_keys=True, indent=4, cls=CoordsEncoder)
 
@@ -73,7 +73,7 @@ class NameResolver:
     def _lookup_zodiac(self, name):
         if name in self.signs:
             star = self.signs[name][0]
-            print ('query-star', star)
+            #print ('query-star', star)
             body = astropy.coordinates.SkyCoord.from_name(star)
             constellation = astropy.coordinates.get_constellation(body)
             print (star, 'in', astropy.coordinates.get_constellation(body))
@@ -82,14 +82,15 @@ class NameResolver:
 
     def lookup(self, name):
         if name in self.data:
-            print ('decoding cached value', name)
+            #print ('decoding cached value', name)
             return CoordsEncoder.decode(self.data[name])
         else:
             try:
-                print ('query-name', name)
+                #print ('query-name', name)
                 coords = astropy.coordinates.SkyCoord.from_name(name)
             except astropy.coordinates.name_resolve.NameResolveError:
                 coords = self._lookup_zodiac(name)
+            # cache the coords
             self.data[name] = [coords.ra, coords.dec]
             return coords
 

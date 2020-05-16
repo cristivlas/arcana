@@ -4,7 +4,7 @@ Plot sky positions of astrological signs -- or rather, plot the homonym constell
 Technically the program plots any celestial body for which we can get sky coords.
 """
 import argparse
-import astropy.coordinates as cs
+import astropy.coordinates
 import astropy.time
 import datetime
 import json
@@ -29,7 +29,7 @@ def draw_reference_lines(image, draw, r, fg='black'):
         draw.line([r + i for i in [0, 0, r*math.cos(a), r*math.sin(a)]], fill=fg)
 
 
-def plot_cellestial_bodies(stars, cellestialBodies, time, location, radius, fg='black', bg='white'):
+def plot_celestial_bodies(stars, celestialBodies, time, location, radius, fg='black', bg='white'):
     r = radius * antialias_scale
 
     image = Image.new('RGBA', [2*r] * 2, bg)
@@ -43,7 +43,7 @@ def plot_cellestial_bodies(stars, cellestialBodies, time, location, radius, fg='
     print ('Observation time:', time)
     print ('Location:', (location.lat, location.lon))
 
-    for name in cellestialBodies:
+    for name in celestialBodies:
         name = name.capitalize()
         plot_angles = stars.get_plot_angles(name, obstime=time, location=location)
         if plot_angles[0] < 0:
@@ -55,7 +55,7 @@ def plot_cellestial_bodies(stars, cellestialBodies, time, location, radius, fg='
 
         draw.ellipse([r - proj, r - proj, r + proj, r + proj], outline=fg)
         a = plot_angles[1]
-        x,y = (proj * i for i in [math.cos(a), math.sin(a)])        
+        x,y = (proj * i for i in [math.cos(a), -math.sin(a)])        
         draw.line([i + r for i in [0,0,x,y]], fill=fg, width=1 * antialias_scale)
     
         text_size = font.getsize(name)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--location', help='location of observer on Earth; example: --location="Seattle,WA"', default='Seattle,WA')
     args = parser.parse_args()
 
-    location = cs.EarthLocation.of_address(args.location)
+    location = astropy.coordinates.EarthLocation.of_address(args.location)
 
     if args.time:
         time = dtparser.parse(args.time)
@@ -85,5 +85,5 @@ if __name__ == '__main__':
     with Stars() as stars:
         if not input:
             input = stars.all_signs()
-        image = plot_cellestial_bodies(stars, input, time, location, args.radius)
+        image = plot_celestial_bodies(stars, input, time, location, args.radius)
         image.show()
