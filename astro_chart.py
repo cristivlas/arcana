@@ -13,10 +13,34 @@ from signs import Icons
 
 resource_dir = 'res'
 
-# Extend (or contract) a rectangle
-def extend(rect, pixelAmount):
-    assert len(rect) == 4
-    return [i+pixelAmount*j for i,j in zip(rect, [-1,-1,1,1])]
+class Geom:
+    @staticmethod
+    def translate(xy, coords, type=float):
+        assert len(coords) % 2 == 0
+        assert len(xy) == 2
+        return [type(i + j) for i, j in zip(coords, int(len(coords)/2) * xy)]
+
+    @staticmethod
+    def scale(c, coords, type=float):
+        return [type(c * i) for i in coords]
+
+    @staticmethod
+    def polar_to_cartesian(a, r=1, type=float):
+        return Geom.scale(r, [math.cos(a), -math.sin(a)], type)
+
+    @staticmethod
+    def polar_to_xy(xy, a, r, type=float):
+        return Geom.translate(xy, Geom.polar_to_cartesian(a, r, type), type)
+
+    @staticmethod
+    def box(r=1, type=float):
+        return Geom.scale(r, [-1,-1,1,1], type)
+
+    # Extend (or contract) a rectangle
+    @staticmethod
+    def extend(rect, pixelAmount, type=float):
+        assert len(rect) == 4
+        return [type(i+pixelAmount*j) for i,j in zip(rect, [-1,-1,1,1])]
 
 def house(rad):
     deg = (math.degrees(rad)-180) % 360
@@ -30,9 +54,10 @@ def ascendant(stars, time, location, window=12):
             continue # already risen, skip
         signs.append(s)
 
-    for h in range(0, window):
-        for s in signs:        
-            t = astropy.time.Time(time + datetime.timedelta(hours=h))
+    for h in range(0, window*15):
+        for s in signs:
+            t = astropy.time.Time(time + datetime.timedelta(minutes=h*15))
+            #print(t, s)
             a = stars.get_plot_angles(s, t, location)
             if a[0] > 0:              
                 return (s,a,t)
@@ -51,16 +76,13 @@ class ChartElement:
     def render(self, image, time, location):
         draw = ImageDraw.Draw(image)        
         if self.radius:
-            # center coords        
-            xy = [int(i)/2 for i in image.size] 
-            
-            # ellipse coords
-            xy = [i+j for i,j in zip(2*xy, [k*self.radius for k in [-1,-1,1,1]])]
-
+            xy = Geom.translate(Geom.scale(1/2, image.size), Geom.box(self.radius))
             color = self.args.fg        
-            draw.ellipse(xy, outline=color, width=int(3 * self.args.antialias_scale))
+            draw.ellipse(xy, outline=color, width=int(1.5 * self.args.antialias_scale))
         return draw
 
+roman = {1:'I', 2:'II', 3:'III', 4:'IV', 5:'V', 6:'VI', 7:'VII', 8:'VIII', 9:'IX', 10:'X', 11:'XI', 12:'XII'}
+        
 """
 Draw axis and the twelve houses
 """
@@ -73,6 +95,7 @@ class ReferenceLines(ChartElement):
         color = self.args.fg
         scale = self.args.antialias_scale
         draw = super().render(image, time, location)
+        font = ImageFont.truetype(path.join(resource_dir, 'Praetoria D.otf'), 40 * scale)    
 
         # coords for the center
         x0, y0 = [int(i)/2 for i in image.size]
@@ -85,8 +108,17 @@ class ReferenceLines(ChartElement):
         radius = max(self.args.planets_radius, self.args.signs_radius) * scale
         for deg in range(0, 360, 30):
             a = math.radians(deg)
-            xy = [0, 0] + [i * radius for i in [math.cos(a), -math.sin(a)]]
-            draw.line([i+j for i,j in zip(2*[x0,y0], xy)], fill=color, width = 2 *scale)
+            xy = [0, 0] + Geom.polar_to_cartesian(a, radius)
+            draw.line(Geom.translate((x0,y0), xy), fill=color, width = 2 *scale)
+        
+        radius *= .85
+        for i in range(0, 12):
+            a = math.radians(195 + 30 * i)
+            xy = Geom.translate((x0,y0), Geom.polar_to_cartesian(a, radius))
+            text = roman[i+1]
+            textSize = font.getsize(text)
+            xy = Geom.translate(Geom.scale(-1/2, textSize), xy)
+            draw.text(xy, text, color, font)
 
 """
 Utility class
@@ -126,7 +158,9 @@ class SolarSystem:
     def names():
         return list(SolarSystem.radii.keys())
     
-    
+"""
+Plot planets on the chart
+"""
 class Planets(ChartElement):
     def __init__(self, args):
         super().__init__(args)
@@ -144,9 +178,8 @@ class Planets(ChartElement):
         altAzFrame = astropy.coordinates.AltAz(obstime=time, location=location, pressure=0)
         
         # image center coords
-        xyCenter = 2*[int(i)/2 for i in image.size]
-        
-        # load font
+        center = Geom.scale(1/2, image.size)
+    
         font = ImageFont.truetype(path.join(resource_dir, 'Praetoria D.otf'), 20 * scale)    
 
         solarSystem = SolarSystem.logscale_radii(font, self.radius)
@@ -161,36 +194,35 @@ class Planets(ChartElement):
 
             # project altitude to plane
             proj = self.radius*math.cos(altAz.alt.rad)
-            xy = [i+proj*j for i,j in zip(xyCenter,[-1,-1,1,1])]
+
+            xy = Geom.translate(center, Geom.box(proj))
             draw.ellipse(xy, outline=self.args.fg)
 
             a = Stars.azimuth(altAz.az.rad)
 
-            # plotting coords for center of body 
-            xy = [proj * i for i in [math.cos(a), -math.sin(a)]]
-            # vector
-            #draw.line([i+j for i,j in zip(xyCenter, [0,0] + xy)], fill=self.args.fg, width=1*scale)
-
+            # plotting coords for center of body
+            xy = Geom.polar_to_cartesian(a, proj)
             ###
             # draw the celestial body
             rbody = solarSystem[name] * self.radius / 3 + 2 * scale
 
             # bounding box
-            bbox = [int(i+j+k*rbody) for i,j,k in zip(2*xy,xyCenter,[-1,-1,1,1])]
+            bbox = Geom.translate(center, Geom.translate(xy, Geom.box(rbody)), int)
 
             crop = image.crop(bbox)
             if name == 'sun':
                 for rsun in [rbody+5*scale, rbody]:
-                    bbox = [int(i+j+k*rsun) for i,j,k in zip(2*xy,xyCenter,[-1,-1,1,1])]
+                    bbox = Geom.translate(center, Geom.translate(xy, Geom.box(rsun)), int)
                     draw.ellipse(bbox, outline=self.args.fg, width=int(1.5*scale), fill=self.args.bg)
             else:
                 draw.ellipse(bbox, outline=self.args.fg, width=3*scale, fill=self.args.bg)
             crop = Image.blend(image.crop(bbox), crop, 0.45)
             image.paste(crop, bbox)
 
-            # name
+            # draw the name (text)
             textSize = font.getsize(name)
-            draw.text([i+j-k/2 for i,j,k in zip(xy, xyCenter, textSize)], name.capitalize(), font=font, fill=self.args.fg) 
+            xyText = Geom.translate(center, Geom.translate(xy, Geom.scale(-1/2, textSize)))
+            draw.text(xyText, name, self.args.fg, font)
 
 
 class Signs(ChartElement):
@@ -217,10 +249,11 @@ class Signs(ChartElement):
         font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 20 * scale)     
 
         draw = super().render(image, time, location)
-        xyCenter = 2*[int(i)/2 for i in image.size]
+        center = Geom.scale(1/2, image.size)
 
-        delayedFuncs = []
         self._render_time_location(draw, scale, font, time, location)
+        
+        delayedFuncs = []
         with Stars() as stars:
             self._render_asc(draw, scale, font, ascendant(stars, time, location))                
             for index, name in enumerate(stars.all_signs()):
@@ -231,42 +264,38 @@ class Signs(ChartElement):
                     continue
                 # project altitude to plane:
                 proj = self.radius * math.cos(plot_angles[0])
-                
-                xy = [i+proj*j for i,j in zip(xyCenter,[-1,-1,1,1])]
+                xy = Geom.translate(center, Geom.box(proj))
                 draw.ellipse(xy, outline=color)
                 
-                a = plot_angles[1]
+                a = plot_angles[1] # azimuth
                 print ('%s: house=%d' % (name, house(a)))
-                xy = [proj * i for i in [math.cos(a), -math.sin(a)]]
-
-                xySign = [i+j for i,j in zip(xy, xyCenter)]
-                
+                xy = Geom.polar_to_cartesian(a, proj)
+                xySign = Geom.translate(center, xy)                
                 # vector
-                draw.line(xyCenter[:2] + xySign, fill=color, width=int(1*scale))                            
+                draw.line(center + xySign, fill=color, width=int(1*scale))                            
 
                 def draw_symbol(index=index, name=name, xySign=xySign):
                     iconMask = self.icons.get(index, self.radius/20)                
                     icon = Image.new(iconMask.mode, iconMask.size, background)
                     xyIcon = [int(i-j/2) for i,j in zip(xySign, icon.size)]                
-                    
-                    bbox = xyIcon + [i+j for i,j in zip(xyIcon, icon.size)]
-                    
-                    bbox = extend(bbox, -6 * scale) #shrink
+    
+                    bbox = xyIcon + [i+j for i,j in zip(xyIcon, icon.size)]                
+                    bbox = Geom.extend(bbox, -6 * scale) #shrink
                     draw.ellipse(bbox, fill=color, outline=background, width=2*scale)
                     image.paste(icon, xyIcon, iconMask)
                 
                     textSize = font.getsize(name)
                     xyText = [i+j for i,j in zip(xySign, [-textSize[0]/2, icon.size[1]/2])]            
                     bbox = xyText + [i+j for i,j in zip(xyText, textSize)]
-                    bbox = extend(bbox, 2 * scale)
-                    crop = image.crop(bbox)                    
+                    bbox = Geom.extend(bbox, 2 * scale, int)
+                    crop = image.crop(bbox)                  
                     draw.rectangle(bbox, fill=background, outline=color, width=2*scale)
                     draw.text(xyText, name, font=font, fill=color)
                     crop = Image.blend(image.crop(bbox), crop, 0.25)
-                    image.paste(crop, [int(i) for i in bbox][:2])
+                    image.paste(crop, bbox[:2])
 
-                delayedFuncs.append(draw_symbol)
-                #draw_symbol(index, name, xySign)
+                #delayedFuncs.append(draw_symbol)
+                draw_symbol(index, name, xySign)
             
             for f in delayedFuncs:
                 f()
@@ -293,7 +322,7 @@ if __name__ == '__main__':
     parser.add_argument('--fg', help='foreground color', default='black')
     parser.add_argument('--bg', help='background color', default='wheat')
     parser.add_argument('--margin', type=int, default=50)
-    parser.add_argument('--planets-radius', default=200, type=int)
+    parser.add_argument('--planets-radius', default=250, type=int)
     parser.add_argument('--signs-radius', default=350, type=int)
     parser.add_argument('--out')
 

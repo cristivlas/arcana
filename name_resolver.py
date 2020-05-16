@@ -10,8 +10,8 @@ import appdirs
 import astropy
 import json
 import math
+import pydoc
 from os import makedirs, path, unlink
-from pydoc import locate
 
 # Custom JSON encoder for Lat / Lon
 class CoordsEncoder(json.JSONEncoder):
@@ -25,7 +25,7 @@ class CoordsEncoder(json.JSONEncoder):
     @staticmethod
     def decode(coords):
         def instance(d):
-            c = locate(d['__class__'])
+            c = pydoc.locate(d['__class__'])
             return c(d['value'])
         latLon = [instance(d) for d in coords]
         return astropy.coordinates.SkyCoord(*latLon)

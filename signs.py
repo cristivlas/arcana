@@ -15,5 +15,5 @@ class Icons:
         row = int(index / 4)
         col = int(index % 4)
         # ... and crop it out
-        cropbox =[coord * 100 * self.scale for coord in [col, row, col+1, row+1]]        
+        cropbox = [coord * 100 * self.scale for coord in [col, row, col+1, row+1]]        
         return self.img.crop(cropbox).resize(2 * [int(size * self.scale)])
