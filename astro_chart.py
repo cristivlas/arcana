@@ -13,10 +13,30 @@ from signs import Icons
 
 resource_dir = 'res'
 
+# Extend (or contract) a rectangle
+def extend(rect, pixelAmount):
+    assert len(rect) == 4
+    return [i+pixelAmount*j for i,j in zip(rect, [-1,-1,1,1])]
+
 def house(rad):
     deg = (math.degrees(rad)-180) % 360
     return deg * 6 / 180 + 1
 
+def ascendant(stars, time, location, window=12):
+    signs = []
+    for s in stars.all_signs():
+        a = stars.get_plot_angles(s, time, location)
+        if a[0] > 0:
+            continue # already risen, skip
+        signs.append(s)
+
+    for h in range(0, window):
+        for s in signs:        
+            t = astropy.time.Time(time + datetime.timedelta(hours=h))
+            a = stars.get_plot_angles(s, t, location)
+            if a[0] > 0:              
+                return (s,a,t)
+    
 #
 # Helper classes for drawing the chart
 #
@@ -134,21 +154,20 @@ class Planets(ChartElement):
         for (name, body) in bodies:
             # get altitude and azimuth        
             altAz = (body.transform_to(altAzFrame))
-
+            
             if (altAz.alt.rad < 0):
                 #print (name, 'not visible', altAz.alt.deg)
                 continue
-        
+
             # project altitude to plane
             proj = self.radius*math.cos(altAz.alt.rad)
             xy = [i+proj*j for i,j in zip(xyCenter,[-1,-1,1,1])]
             draw.ellipse(xy, outline=self.args.fg)
 
-            a = altAz.az.rad - math.pi / 2
+            a = Stars.azimuth(altAz.az.rad)
 
             # plotting coords for center of body 
             xy = [proj * i for i in [math.cos(a), -math.sin(a)]]
-
             # vector
             #draw.line([i+j for i,j in zip(xyCenter, [0,0] + xy)], fill=self.args.fg, width=1*scale)
 
@@ -161,9 +180,9 @@ class Planets(ChartElement):
 
             crop = image.crop(bbox)
             if name == 'sun':
-                for rsun in [rbody+15, rbody]:
+                for rsun in [rbody+5*scale, rbody]:
                     bbox = [int(i+j+k*rsun) for i,j,k in zip(2*xy,xyCenter,[-1,-1,1,1])]
-                    draw.ellipse(bbox, outline=self.args.fg, width=scale, fill=self.args.bg)
+                    draw.ellipse(bbox, outline=self.args.fg, width=int(1.5*scale), fill=self.args.bg)
             else:
                 draw.ellipse(bbox, outline=self.args.fg, width=3*scale, fill=self.args.bg)
             crop = Image.blend(image.crop(bbox), crop, 0.45)
@@ -173,29 +192,42 @@ class Planets(ChartElement):
             textSize = font.getsize(name)
             draw.text([i+j-k/2 for i,j,k in zip(xy, xyCenter, textSize)], name.capitalize(), font=font, fill=self.args.fg) 
 
+
 class Signs(ChartElement):
     def __init__(self, args):
         super().__init__(args)
         self.radius = args.signs_radius * args.antialias_scale
         self.icons = Icons(path.join(resource_dir, 'Astro_signs.png'), args.antialias_scale)
 
+    def _render_asc(self, draw, scale, font, asc):
+        if not asc:
+            return
+        text = 'Ascendant: ' + asc[0] + ' ' + str(asc[2].to_datetime())
+        draw.text([10*scale, 70*scale], text, font=font, fill=self.args.fg)
+    
+    def _render_time_location(self, draw, scale, font, time, location):
+        loc = str((location.lon, location.lat))
+        draw.text([10*scale, 10*scale], 'Location: ' + loc, font=font, fill=self.args.fg)
+        draw.text([10*scale, 40*scale], 'Time: ' + str(time), font=font, fill=self.args.fg)
+
     def render(self, image, time, location):
         scale = self.args.antialias_scale
         color = self.args.fg
         background = self.args.bg
-        font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 22 * scale)     
+        font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 20 * scale)     
 
         draw = super().render(image, time, location)
         xyCenter = 2*[int(i)/2 for i in image.size]
 
-        funcs = []
-
+        delayedFuncs = []
+        self._render_time_location(draw, scale, font, time, location)
         with Stars() as stars:
+            self._render_asc(draw, scale, font, ascendant(stars, time, location))                
             for index, name in enumerate(stars.all_signs()):
                 name = name.capitalize()
                 plot_angles = stars.get_plot_angles(name, obstime=time, location=location)
                 if plot_angles[0] < 0:
-                    #print ('%s is not visible, altitude=%f rad' % (name, plot_angles[0]))
+                    print (name, 'is not visible', plot_angles)
                     continue
                 # project altitude to plane:
                 proj = self.radius * math.cos(plot_angles[0])
@@ -217,18 +249,26 @@ class Signs(ChartElement):
                     icon = Image.new(iconMask.mode, iconMask.size, background)
                     xyIcon = [int(i-j/2) for i,j in zip(xySign, icon.size)]                
                     
-                    draw.ellipse(xyIcon + [i+j for i,j in zip(xyIcon, icon.size)], fill=color, outline=background, width=2*scale)
+                    bbox = xyIcon + [i+j for i,j in zip(xyIcon, icon.size)]
+                    
+                    bbox = extend(bbox, -6 * scale) #shrink
+                    draw.ellipse(bbox, fill=color, outline=background, width=2*scale)
                     image.paste(icon, xyIcon, iconMask)
                 
                     textSize = font.getsize(name)
                     xyText = [i+j for i,j in zip(xySign, [-textSize[0]/2, icon.size[1]/2])]            
-                    draw.rectangle(xyText + [i+j for i,j in zip(xyText, textSize)], fill=background, outline=background)
+                    bbox = xyText + [i+j for i,j in zip(xyText, textSize)]
+                    bbox = extend(bbox, 2 * scale)
+                    crop = image.crop(bbox)                    
+                    draw.rectangle(bbox, fill=background, outline=color, width=2*scale)
                     draw.text(xyText, name, font=font, fill=color)
+                    crop = Image.blend(image.crop(bbox), crop, 0.25)
+                    image.paste(crop, [int(i) for i in bbox][:2])
 
-                funcs.append(draw_symbol)
+                delayedFuncs.append(draw_symbol)
                 #draw_symbol(index, name, xySign)
             
-            for f in funcs:
+            for f in delayedFuncs:
                 f()
 
              
@@ -252,13 +292,15 @@ if __name__ == '__main__':
     parser.add_argument('--antialias-scale', type=int, default=4)
     parser.add_argument('--fg', help='foreground color', default='black')
     parser.add_argument('--bg', help='background color', default='wheat')
-    parser.add_argument('--margin', type=int, default=25)
+    parser.add_argument('--margin', type=int, default=50)
     parser.add_argument('--planets-radius', default=200, type=int)
     parser.add_argument('--signs-radius', default=350, type=int)
+    parser.add_argument('--out')
 
     args = parser.parse_args()
 
     location = astropy.coordinates.EarthLocation.of_address(args.location)
+    #astropy.coordinates.solar_system_ephemeris.set('de432s')    
     astropy.coordinates.solar_system_ephemeris.set('jpl')    
 
     if args.time:
@@ -273,3 +315,6 @@ if __name__ == '__main__':
 
     image = astro_chart(args, time, location)
     image.show()
+    if args.out:
+        image.save(args.out)
+

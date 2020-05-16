@@ -47,7 +47,7 @@ def plot_celestial_bodies(stars, celestialBodies, time, location, radius, fg='bl
         name = name.capitalize()
         plot_angles = stars.get_plot_angles(name, obstime=time, location=location)
         if plot_angles[0] < 0:
-            print ('%s is not visible, altitude=%f rad' % (name, plot_angles[0]))
+            print (name, 'is not visible:', plot_angles)
             continue
 
         # project altitude to plane

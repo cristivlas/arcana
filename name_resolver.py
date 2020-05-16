@@ -94,13 +94,18 @@ class NameResolver:
             self.data[name] = [coords.ra, coords.dec]
             return coords
 
+    @staticmethod
+    def azimuth(rad):
+        assert rad >= 0 and rad < 2*math.pi
+        return (2*math.pi-rad + math.pi/2)        
+
     def get_plot_angles(self, name, obstime, location):
         skyCoord = self.lookup(name)
         # get altitude and azimuth
         altAz = (skyCoord.transform_to(astropy.coordinates.AltAz(location=location, obstime=obstime)))
 
         # adjust Azimuth (which is measured from North) to trigonometric zero (which is East)
-        return [altAz.alt.rad, altAz.az.rad - math.pi / 2]
+        return [altAz.alt.rad, self.azimuth(altAz.az.rad)]
 
     def all_signs(self):
         return list(self.signs.keys())
