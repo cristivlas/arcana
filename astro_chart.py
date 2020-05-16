@@ -38,7 +38,7 @@ class ChartElement:
             xy = [i+j for i,j in zip(2*xy, [k*self.radius for k in [-1,-1,1,1]])]
 
             color = self.args.fg        
-            draw.ellipse(xy, outline=color, width=int(1.25 * self.args.antialias_scale))
+            draw.ellipse(xy, outline=color, width=int(3 * self.args.antialias_scale))
         return draw
 
 """
@@ -66,7 +66,7 @@ class ReferenceLines(ChartElement):
         for deg in range(0, 360, 30):
             a = math.radians(deg)
             xy = [0, 0] + [i * radius for i in [math.cos(a), -math.sin(a)]]
-            draw.line([i+j for i,j in zip(2*[x0,y0], xy)], fill=color)
+            draw.line([i+j for i,j in zip(2*[x0,y0], xy)], fill=color, width = 2 *scale)
 
 """
 Utility class
@@ -187,6 +187,9 @@ class Signs(ChartElement):
 
         draw = super().render(image, time, location)
         xyCenter = 2*[int(i)/2 for i in image.size]
+
+        funcs = []
+
         with Stars() as stars:
             for index, name in enumerate(stars.all_signs()):
                 name = name.capitalize()
@@ -208,20 +211,25 @@ class Signs(ChartElement):
                 
                 # vector
                 draw.line(xyCenter[:2] + xySign, fill=color, width=int(1*scale))                            
+
+                def draw_symbol(index=index, name=name, xySign=xySign):
+                    iconMask = self.icons.get(index, self.radius/20)                
+                    icon = Image.new(iconMask.mode, iconMask.size, background)
+                    xyIcon = [int(i-j/2) for i,j in zip(xySign, icon.size)]                
+                    
+                    draw.ellipse(xyIcon + [i+j for i,j in zip(xyIcon, icon.size)], fill=color, outline=background, width=2*scale)
+                    image.paste(icon, xyIcon, iconMask)
                 
-                # symbol
-                iconMask = self.icons.get(index, self.radius/20)                
-                icon = Image.new(iconMask.mode, iconMask.size, background)
-                xyIcon = [int(i-j/2) for i,j in zip(xySign, icon.size)]                
-                
-                draw.ellipse(xyIcon + [i+j for i,j in zip(xyIcon, icon.size)], fill=color, outline=background, width=2*scale)
-                image.paste(icon, xyIcon, iconMask)
+                    textSize = font.getsize(name)
+                    xyText = [i+j for i,j in zip(xySign, [-textSize[0]/2, icon.size[1]/2])]            
+                    draw.rectangle(xyText + [i+j for i,j in zip(xyText, textSize)], fill=background, outline=background)
+                    draw.text(xyText, name, font=font, fill=color)
+
+                funcs.append(draw_symbol)
+                #draw_symbol(index, name, xySign)
             
-                textSize = font.getsize(name)
-                xyText = [i+j for i,j in zip(xySign, [-textSize[0]/2, icon.size[1]/2])]            
-                draw.rectangle(xyText + [i+j for i,j in zip(xyText, textSize)], fill=background, outline=background)
-                draw.text(xyText, name, font=font, fill=color)
-                
+            for f in funcs:
+                f()
 
              
 def astro_chart(args, time, location):
@@ -245,7 +253,7 @@ if __name__ == '__main__':
     parser.add_argument('--fg', help='foreground color', default='black')
     parser.add_argument('--bg', help='background color', default='wheat')
     parser.add_argument('--margin', type=int, default=25)
-    parser.add_argument('--planets-radius', default=250, type=int)
+    parser.add_argument('--planets-radius', default=200, type=int)
     parser.add_argument('--signs-radius', default=350, type=int)
 
     args = parser.parse_args()
