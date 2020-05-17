@@ -5,6 +5,7 @@ import datetime
 import json
 import math
 
+from astropy import units as U
 from dateutil import parser as dtparser
 from name_resolver import NameResolver as Stars
 from os import path
@@ -42,6 +43,10 @@ class Geom:
         assert len(rect) == 4
         return [type(i+pixelAmount*j) for i,j in zip(rect, [-1,-1,1,1])]
 
+    @staticmethod
+    def center(image, coords):
+        return Geom.translate(Geom.scale(1/2, image.size), coords)
+
 def house(rad):
     deg = (math.degrees(rad)-180) % 360
     return deg * 6 / 180 + 1
@@ -59,7 +64,7 @@ def ascendant(stars, time, location, window=12):
             t = astropy.time.Time(time + datetime.timedelta(minutes=h*15))
             #print(t, s)
             a = stars.get_plot_angles(s, t, location)
-            if a[0] > 0:              
+            if a[0] > 0:
                 return (s,a,t)
     
 #
@@ -157,7 +162,36 @@ class SolarSystem:
     @staticmethod
     def names():
         return list(SolarSystem.radii.keys())
+
+def format_angle(angle):
+    a = astropy.coordinates.angles.Angle(angle, U.rad).wrap_at(180*U.deg)
+    return a.to_string(unit=U.degree, sep=('° ', '\' ', '\'\''))
+   
+def draw_rotated_text(image, angle, radius, text, color, font, align):
+    textSize = font.getsize(text)
+    justify = {
+        'left': [0,0],
+        'right': Geom.scale(-1, textSize),
+        'center': Geom.scale(-1/2, textSize)
+    }
+    # create a temporary image on which to draw the text
+    # (we will then rotate that image and superimpose it on the main image)
+    txt = Image.new(image.mode, image.size)
+    xy = Geom.center(txt, Geom.translate((radius, 0), justify[align]))    
+    # Image rotation function want their arguments in degrees
+    degrees = math.degrees(angle) % 360
     
+    # flip the text for quadrants 2 and 3 so we don't twist 
+    # our necks trying to read the text -- comment the code 
+    # out to see the difference
+    if degrees > 90 and degrees < 270:
+        xy = (txt.size[0]-xy[0]-textSize[0], xy[1])
+        degrees -= 180 + 2.5
+
+    ImageDraw.Draw(txt).text(xy, text, color, font)
+    txt = txt.rotate(degrees)
+    image.paste(txt, (0,0), txt)
+
 """
 Plot planets on the chart
 """
@@ -202,10 +236,9 @@ class Planets(ChartElement):
 
             # plotting coords for center of body
             xy = Geom.polar_to_cartesian(a, proj)
-            ###
-            # draw the celestial body
+            
+            # radius for drawing the celestial body
             rbody = solarSystem[name] * self.radius / 3 + 2 * scale
-
             # bounding box
             bbox = Geom.translate(center, Geom.translate(xy, Geom.box(rbody)), int)
 
@@ -224,7 +257,9 @@ class Planets(ChartElement):
             xyText = Geom.translate(center, Geom.translate(xy, Geom.scale(-1/2, textSize)))
             draw.text(xyText, name, self.args.fg, font)
 
-
+"""
+Plot observable astrological signs
+"""
 class Signs(ChartElement):
     def __init__(self, args):
         super().__init__(args)
@@ -232,10 +267,9 @@ class Signs(ChartElement):
         self.icons = Icons(path.join(resource_dir, 'Astro_signs.png'), args.antialias_scale)
 
     def _render_asc(self, draw, scale, font, asc):
-        if not asc:
-            return
-        text = 'Ascendant: ' + asc[0] + ' ' + str(asc[2].to_datetime())
-        draw.text([10*scale, 70*scale], text, font=font, fill=self.args.fg)
+        if asc:
+            text = 'Ascendant: ' + asc[0] + ' ' + str(asc[2].to_datetime())
+            draw.text([10*scale, 70*scale], text, font=font, fill=self.args.fg)
     
     def _render_time_location(self, draw, scale, font, time, location):
         loc = str((location.lon, location.lat))
@@ -246,7 +280,8 @@ class Signs(ChartElement):
         scale = self.args.antialias_scale
         color = self.args.fg
         background = self.args.bg
-        font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 20 * scale)     
+        font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 22 * scale)     
+        greek = ImageFont.truetype(path.join(resource_dir, 'Marav2.ttf'), 32 * scale)    
 
         draw = super().render(image, time, location)
         center = Geom.scale(1/2, image.size)
@@ -257,7 +292,6 @@ class Signs(ChartElement):
         with Stars() as stars:
             self._render_asc(draw, scale, font, ascendant(stars, time, location))                
             for index, name in enumerate(stars.all_signs()):
-                name = name.capitalize()
                 plot_angles = stars.get_plot_angles(name, obstime=time, location=location)
                 if plot_angles[0] < 0:
                     print (name, 'is not visible', plot_angles)
@@ -268,35 +302,40 @@ class Signs(ChartElement):
                 draw.ellipse(xy, outline=color)
                 
                 a = plot_angles[1] # azimuth
-                print ('%s: house=%d' % (name, house(a)))
+                #print ('%s: house=%d' % (name, house(a)))
                 xy = Geom.polar_to_cartesian(a, proj)
                 xySign = Geom.translate(center, xy)                
                 # vector
-                draw.line(center + xySign, fill=color, width=int(1*scale))                            
+                draw.line(center + xySign, fill=color, width=int(1*scale))    
 
+                r = proj if index % 2 else -proj
+                draw_rotated_text(image, a+math.pi/36, r, format_angle(a), 'navy', font=greek, align='left')
+
+                # force capture of arguments by binding to default values
+                # https://stackoverflow.com/questions/2295290/what-do-lambda-function-closures-capture
                 def draw_symbol(index=index, name=name, xySign=xySign):
-                    iconMask = self.icons.get(index, self.radius/20)                
-                    icon = Image.new(iconMask.mode, iconMask.size, background)
-                    xyIcon = [int(i-j/2) for i,j in zip(xySign, icon.size)]                
-    
-                    bbox = xyIcon + [i+j for i,j in zip(xyIcon, icon.size)]                
-                    bbox = Geom.extend(bbox, -6 * scale) #shrink
+                    mask = self.icons.get(index, self.radius/20)
+                    icon = Image.new(mask.mode, mask.size, background)
+                    xyIcon = Geom.translate(xySign, Geom.scale(-1/2, icon.size), int)
+                    bbox = xyIcon + Geom.translate(xyIcon, icon.size)             
+                    # shrink box by a few pixels:
+                    bbox = Geom.extend(bbox, -6 * scale)
                     draw.ellipse(bbox, fill=color, outline=background, width=2*scale)
-                    image.paste(icon, xyIcon, iconMask)
-                
+                    image.paste(icon, xyIcon, mask)
+                    # text
                     textSize = font.getsize(name)
-                    xyText = [i+j for i,j in zip(xySign, [-textSize[0]/2, icon.size[1]/2])]            
-                    bbox = xyText + [i+j for i,j in zip(xyText, textSize)]
+                    xyText = Geom.translate(xySign, Geom.scale(1/2, [-textSize[0], icon.size[1]]))          
+                    bbox = xyText + Geom.translate(xyText, textSize)
                     bbox = Geom.extend(bbox, 2 * scale, int)
-                    crop = image.crop(bbox)                  
+                    crop = image.crop(bbox)
                     draw.rectangle(bbox, fill=background, outline=color, width=2*scale)
                     draw.text(xyText, name, font=font, fill=color)
                     crop = Image.blend(image.crop(bbox), crop, 0.25)
-                    image.paste(crop, bbox[:2])
+                    image.paste(crop, bbox)
 
-                #delayedFuncs.append(draw_symbol)
-                draw_symbol(index, name, xySign)
+                delayedFuncs.append(draw_symbol)
             
+            # batch-draw all signs
             for f in delayedFuncs:
                 f()
 

@@ -66,8 +66,11 @@ class NameResolver:
         with open(filename) as f:
             zodiac = json.load(f)
         self.signs = {}
+        self.names = []
         for sign in zodiac:
-            self.signs[sign['name']] = sign['stars']
+            name = sign['name']
+            self.signs[name] = sign['stars']
+            self.names.append(name)
 
     """ if name specifies a constellation, look it up by the brightest star """ 
     def _lookup_zodiac(self, name):
@@ -108,4 +111,4 @@ class NameResolver:
         return [altAz.alt.rad, self.azimuth(altAz.az.rad)]
 
     def all_signs(self):
-        return list(self.signs.keys())
+        return self.names
