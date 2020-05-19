@@ -19,16 +19,22 @@ class CoordsEncoder(json.JSONEncoder):
         if isinstance(obj, astropy.coordinates.angles.Latitude):
             return { 'value': obj.to_string(), '__class__': 'astropy.coordinates.angles.Latitude' }
         elif isinstance(obj, astropy.coordinates.angles.Longitude):
-            return { 'value': obj.to_string(), '__class__': 'astropy.coordinates.angles.Longitude' }
-        return super.default(self, obj)
+            return { 'value': obj.to_string(), '__class__': 'astropy.coordinates.angles.Longitude' }        
+        elif isinstance(obj, astropy.coordinates.SkyCoord):            
+            return [ self.default(obj.ra), self.default(obj.dec) ]
+        return super().default(obj)
 
     @staticmethod
-    def decode(coords):
+    def decode(coord):
         def instance(d):
             c = pydoc.locate(d['__class__'])
             return c(d['value'])
-        latLon = [instance(d) for d in coords]
-        return astropy.coordinates.SkyCoord(*latLon)
+        if isinstance(coord, list):
+            latLon = [d if isinstance(d, astropy.coordinates.angles.Angle) else instance(d) for d in coord]
+            return astropy.coordinates.SkyCoord(*latLon)
+        else:
+            assert isinstance(coord, astropy.coordinates.SkyCoord)
+        return coord
 
 class NameResolver:
     def __init__(self, zodiac_file='zodiac.json'):
@@ -49,7 +55,7 @@ class NameResolver:
         self._save_data()
 
     def _load_data(self):
-        #print ('reading', self.path)
+        print ('reading', self.path)
         with open(self.path) as f:
             try:
                 self.data = json.load(f)
@@ -58,24 +64,29 @@ class NameResolver:
                 print ('unlinked cache file', self.path)
 
     def _save_data(self):
-        #print ('writing', self.path)
-        with open(self.path, 'w') as f:
-            json.dump(obj=self.data, fp=f, sort_keys=True, indent=4, cls=CoordsEncoder)
+        if not path.exists(self.path):
+            print ('writing', self.path)        
+            with open(self.path, 'w') as f:
+                json.dump(obj=self.data, fp=f, sort_keys=True, indent=4, cls=CoordsEncoder)
 
     def _load_zodiac(self, filename):
         with open(filename) as f:
             zodiac = json.load(f)
         self.signs = {}
         self.names = []
+
         for sign in zodiac:
             name = sign['name']
-            self.signs[name] = sign['stars']
-            self.names.append(name)
+            if 'stars' in sign:
+                self.signs[name] = sign
+                self.names.append(name)
+            if 'RA' in sign and 'dec' in sign:
+                self.data[name] = astropy.coordinates.SkyCoord(sign['RA'], sign['dec'])                
 
     """ if name specifies a constellation, look it up by the brightest star """ 
     def _lookup_zodiac(self, name):
         if name in self.signs:
-            star = self.signs[name][0]
+            star = self.signs[name]['stars'][0]
             #print ('query-star', star)
             body = astropy.coordinates.SkyCoord.from_name(star)
             constellation = astropy.coordinates.get_constellation(body)
@@ -94,7 +105,8 @@ class NameResolver:
             except astropy.coordinates.name_resolve.NameResolveError:
                 coords = self._lookup_zodiac(name)
             # cache the coords
-            self.data[name] = [coords.ra, coords.dec]
+            # self.data[name] = [coords.ra, coords.dec]
+            self.data[name] = coords
             return coords
 
     @staticmethod
@@ -112,3 +124,6 @@ class NameResolver:
 
     def all_signs(self):
         return self.names
+
+    def get(self, name, attr):
+        return self.signs[name][attr]

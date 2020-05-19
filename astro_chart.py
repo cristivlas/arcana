@@ -44,8 +44,8 @@ class Geom:
         return [type(i+pixelAmount*j) for i,j in zip(rect, [-1,-1,1,1])]
 
     @staticmethod
-    def center(image, coords):
-        return Geom.translate(Geom.scale(1/2, image.size), coords)
+    def center(image, coords, type=float):
+        return Geom.translate(Geom.scale(1/2, image.size), coords, type)
 
 def house(rad):
     deg = (math.degrees(rad)-180) % 360
@@ -94,36 +94,46 @@ Draw axis and the twelve houses
 class ReferenceLines(ChartElement):
     def __init__(self, args):
         super().__init__(args)
+        self.icons = Icons(path.join(resource_dir, 'Astro_signs.png'), args.antialias_scale)
 
     def render(self, image, time, location):
         size = image.size
         color = self.args.fg
         scale = self.args.antialias_scale
         draw = super().render(image, time, location)
-        font = ImageFont.truetype(path.join(resource_dir, 'Praetoria D.otf'), 40 * scale)    
+        font = ImageFont.truetype(path.join(resource_dir, 'Praetoria D.otf'), 32 * scale)    
 
-        # coords for the center
-        x0, y0 = [int(i)/2 for i in image.size]
+        x0, y0 = Geom.scale(1/2, image.size, int) # center coords        
 
         # axis
         draw.line((0, y0, size[0], y0), fill=color, width=1 * scale)
         draw.line((x0, 0, x0, size[1]), fill=color, width=1 * scale)
-
+        
         # houses
         radius = max(self.args.planets_radius, self.args.signs_radius) * scale
         for deg in range(0, 360, 30):
             a = math.radians(deg)
             xy = [0, 0] + Geom.polar_to_cartesian(a, radius)
-            draw.line(Geom.translate((x0,y0), xy), fill=color, width = 2 *scale)
-        
+            draw.line(Geom.translate((x0,y0), xy), fill=color)
+                
         radius *= .85
         for i in range(0, 12):
             a = math.radians(195 + 30 * i)
             xy = Geom.translate((x0,y0), Geom.polar_to_cartesian(a, radius))
+            # house in Roman numerals
             text = roman[i+1]
             textSize = font.getsize(text)
             xy = Geom.translate(Geom.scale(-1/2, textSize), xy)
             draw.text(xy, text, color, font)
+
+            # ruler's icon
+            icon = self.icons.get(i, radius/24, 'tan')
+            xyc = Geom.translate((x0,y0), Geom.polar_to_cartesian(a, radius *.75), int)
+            xy = Geom.translate(Geom.scale(-1/2, icon.size), xyc, int)
+            image.paste(icon, xy, icon)
+            icon = self.icons.get(i, radius/30, 'maroon')
+            xy = Geom.translate(Geom.scale(-1/2, icon.size), xyc, int)
+            image.paste(icon, xy, icon)
 
 """
 Utility class
@@ -229,14 +239,14 @@ class Planets(ChartElement):
             # project altitude to plane
             proj = self.radius*math.cos(altAz.alt.rad)
 
-            xy = Geom.translate(center, Geom.box(proj))
-            draw.ellipse(xy, outline=self.args.fg)
+            #xy = Geom.translate(center, Geom.box(proj))
+            #draw.ellipse(xy, outline=self.args.fg)
 
             a = Stars.azimuth(altAz.az.rad)
 
             # plotting coords for center of body
             xy = Geom.polar_to_cartesian(a, proj)
-            
+
             # radius for drawing the celestial body
             rbody = solarSystem[name] * self.radius / 3 + 2 * scale
             # bounding box
@@ -269,28 +279,31 @@ class Signs(ChartElement):
     def _render_asc(self, draw, scale, font, asc):
         if asc:
             text = 'Ascendant: ' + asc[0] + ' ' + str(asc[2].to_datetime())
-            draw.text([10*scale, 70*scale], text, font=font, fill=self.args.fg)
+            draw.text([10*scale, font.getsize(text)[1]*4], text, font=font, fill=self.args.fg)
     
     def _render_time_location(self, draw, scale, font, time, location):
         loc = str((location.lon, location.lat))
-        draw.text([10*scale, 10*scale], 'Location: ' + loc, font=font, fill=self.args.fg)
-        draw.text([10*scale, 40*scale], 'Time: ' + str(time), font=font, fill=self.args.fg)
+        h = font.getsize('LT')[1]
+        draw.text([10*scale, h], 'Location: ' + loc, font=font, fill=self.args.fg)
+        draw.text([10*scale, 2.5*h], 'Time: ' + str(time), font=font, fill=self.args.fg)
 
     def render(self, image, time, location):
         scale = self.args.antialias_scale
         color = self.args.fg
         background = self.args.bg
         font = ImageFont.truetype(path.join(resource_dir, 'deutschgothic.ttf'), 22 * scale)     
-        greek = ImageFont.truetype(path.join(resource_dir, 'Marav2.ttf'), 32 * scale)    
+        greek = ImageFont.truetype(path.join(resource_dir, 'AseaItalic.ttf'), 16 * scale)
 
         draw = super().render(image, time, location)
         center = Geom.scale(1/2, image.size)
 
-        self._render_time_location(draw, scale, font, time, location)
+        font2 = greek
+        self._render_time_location(draw, scale, font2, time, location)
         
         delayedFuncs = []
         with Stars() as stars:
-            self._render_asc(draw, scale, font, ascendant(stars, time, location))                
+            
+            self._render_asc(draw, scale, font2, ascendant(stars, time, location))                
             for index, name in enumerate(stars.all_signs()):
                 plot_angles = stars.get_plot_angles(name, obstime=time, location=location)
                 if plot_angles[0] < 0:
@@ -298,8 +311,8 @@ class Signs(ChartElement):
                     continue
                 # project altitude to plane:
                 proj = self.radius * math.cos(plot_angles[0])
-                xy = Geom.translate(center, Geom.box(proj))
-                draw.ellipse(xy, outline=color)
+                #xy = Geom.translate(center, Geom.box(proj))
+                #draw.ellipse(xy, outline=color)
                 
                 a = plot_angles[1] # azimuth
                 #print ('%s: house=%d' % (name, house(a)))
@@ -308,20 +321,20 @@ class Signs(ChartElement):
                 # vector
                 draw.line(center + xySign, fill=color, width=int(1*scale))    
 
-                r = proj if index % 2 else -proj
-                draw_rotated_text(image, a+math.pi/36, r, format_angle(a), 'navy', font=greek, align='left')
+                r,align = (proj,'left') if index % 2 else (-proj, 'right')
+                text = stars.get(name, 'greek') + ' ' + format_angle(a)
+                draw_rotated_text(image, a-math.pi/36, .25*r, text, color, font=greek, align=align)
 
                 # force capture of arguments by binding to default values
                 # https://stackoverflow.com/questions/2295290/what-do-lambda-function-closures-capture
                 def draw_symbol(index=index, name=name, xySign=xySign):
-                    mask = self.icons.get(index, self.radius/20)
-                    icon = Image.new(mask.mode, mask.size, background)
+                    icon = self.icons.get(index, self.radius/20, background)
                     xyIcon = Geom.translate(xySign, Geom.scale(-1/2, icon.size), int)
                     bbox = xyIcon + Geom.translate(xyIcon, icon.size)             
                     # shrink box by a few pixels:
                     bbox = Geom.extend(bbox, -6 * scale)
                     draw.ellipse(bbox, fill=color, outline=background, width=2*scale)
-                    image.paste(icon, xyIcon, mask)
+                    image.paste(icon, xyIcon, icon)
                     # text
                     textSize = font.getsize(name)
                     xyText = Geom.translate(xySign, Geom.scale(1/2, [-textSize[0], icon.size[1]]))          

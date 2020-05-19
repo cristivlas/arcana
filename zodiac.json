@@ -1,6 +1,7 @@
 [
     {
         "name": "Aries",
+        "greek": "Κριός",
         "symbol": "The Ram",
         "stars": ["Hamal"],
         "dates": ["March 21st", "April 19th"],
@@ -43,6 +44,7 @@
     },
     {
         "name": "Taurus",
+        "greek": "Ταύρος",
         "stars": ["Aldebaran"],
         "symbol": "The Bull",
         "dates": ["April 20th", "May 20th"],
@@ -84,6 +86,7 @@
     },
     {
         "name": "Gemini",
+        "greek": "Δίδυμοι",
         "stars": ["Pollux", "Castor"],
         "symbol": "The Twins",
         "dates": ["May  21st", "June 20th"],
@@ -125,6 +128,7 @@
     },
     {
         "name": "Cancer",
+        "greek": "Καρκίνος",
         "stars": ["Altarf"],
         "symbol": "The Crab",
         "dates": ["June  21st", "July 22nd"],
@@ -166,6 +170,7 @@
     },
     {
         "name": "Leo",
+        "greek": "Λέων",
         "stars": ["Regulus"],
         "symbol": "The Lion",
         "dates": ["July  23rd", "August 22nd"],
@@ -207,6 +212,7 @@
     },
     {
         "name": "Virgo",
+        "greek": "Παρθένος",
         "stars": ["Spica"],
         "symbol": "The Virgin",
         "dates": ["August  23rd", "September 22nd"],
@@ -248,6 +254,7 @@
     },
     {
         "name": "Libra",
+        "greek": "Ζυγός",
         "stars": ["Zubeneschamali"],
         "symbol": "The Scales",
         "dates": ["September 23rd", "October 22nd"],
@@ -289,6 +296,7 @@
     },
     {
         "name": "Scorpius",
+        "greek": "Σκορπιός",
         "stars": ["Antares"],
         "symbol": "The Scorpion",
         "dates": ["October 23rd", "November 21st"],
@@ -330,6 +338,7 @@
     },
     {
         "name": "Sagittarius",
+        "greek": "Τοξότης",
         "stars": ["Kaus Australis"],
         "symbol": "The Archer",
         "dates": ["November 22nd", "December 21st"],
@@ -371,6 +380,7 @@
     },
     {
         "name": "Capricornus",
+        "greek": "Αιγόκερως",
         "stars": ["Deneb Algedi"],
         "symbol": "The Goat",
         "dates": ["December 22nd", "January 19th"],
@@ -412,6 +422,7 @@
     },
     {
         "name": "Aquarius",
+        "greek": "Υδροχόος",
         "stars": ["Sadalsuud"],
         "symbol": "The Water Bearer",
         "dates": ["January 22nd", "February 18th"],
@@ -453,6 +464,7 @@
     },
     {
         "name": "Pisces",
+        "greek": "Ιχθύες",
         "stars": ["Alpherg"],
         "symbol": "The Fishes",
         "dates": ["February 19th", "March 20th"],

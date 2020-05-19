@@ -91,7 +91,7 @@ class Zodiac:
             canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[1]-r, xy[0]+r, xy[1]+r]], fill=None, outline=self.args.fg, width=Zodiac.scale)
 
             # just a cool effect:
-            canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[0]-r, xy[1]+r, xy[1]+r]], fill=None, outline=self.args.fg)
+            #canvas.ellipse([i + self.radius for i in [xy[0]-r, xy[0]-r, xy[1]+r, xy[1]+r]], fill=None, outline=self.args.fg)
 
             # OK. Now let's draw the names of the constellations associated with each of the decans
             constellation = sign['decans'][j]['constellation']
